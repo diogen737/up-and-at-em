@@ -47,38 +47,10 @@ make all -j5
 ```
 pip install pipenv
 ```
+ - VS Code setup:
+   - Install `Settings Sync` extension
+   - Inport previously saved settings (keep Access token and Gist ID in private storage)
 
- - dlib from source
-
-```bash
-workon neuro
-git clone https://github.com/davisking/dlib.git
-cd dlib
-git checkout <the latest version>
-python setup.py install --yes USE_AVX_INSTRUCTIONS
-```
-
- - OpenCV from source
-
-```bash
-workon neuro
-wget -O opencv.zip https://github.com/Itseez/opencv/archive/3.4.0.zip
-wget -O opencv_contrib.zip https://github.com/Itseez/opencv_contrib/archive/3.4.0.zip
-unzip -d ~/linux-distr opencv.zip
-unzip -d ~/linux-distr opencv_contrib.zip
-mkdir ~/linux-distr/opencv-3.4.0/build
-cd ~/linux-distr/opencv-3.4.0/build
-cmake -D build_type=release -D cmake_install_prefix=/usr/local \
-      -D install_python_examples=on -D install_c_examples=off \
-      -D install_java_examples=on -D with_cuda=on \
-      -D opencv_extra_modules_path=~/linux-distr/opencv_contrib-3.4.0/modules \
-      -D python_executable=~/.virtualenvs/neuro/bin/python3.6 \
-      -D build_examples=on ..
-make all -j4 && sudo make install -j4
-sudo ldconfig
-sudo mv /usr/local/lib/python3.6/site-packages/cv2.cpython-36m-x86_64-linux-gnu.so /usr/local/lib/python3.6/site-packages/cv2.so
-ln -s /usr/local/lib/python3.6/site-packages/cv2.cpython-36m-x86_64-linux-gnu.so ~/.virtualenvs/neuro/lib/python3.6/site-packages/cv2.so
-```
 
 ### Additional setup steps
  - Arrange Favorites in the Whisker menu:
@@ -87,6 +59,7 @@ ln -s /usr/local/lib/python3.6/site-packages/cv2.cpython-36m-x86_64-linux-gnu.so
    - MATE Calculator
    - Google Chrome
    - Firefox Web Browser
+   - Tor Browser
    - Postman
    - Keepass
    - Skype
