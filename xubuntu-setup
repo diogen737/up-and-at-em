@@ -86,13 +86,13 @@ PURGE_SOFT="modemmanager pidgin catfish gnome-mines
 #
 #########################################################################################
 
-SOURCE_SOFT=( gradle skype postman libinput npm )
+SOURCE_SOFT=( gradle skype postman libinput npm tor )
 
 GRADLE_URL="https://downloads.gradle.org/distributions/gradle-5.1.1-all.zip"
 SKYPE_URL="https://repo.skype.com/latest/skypeforlinux-64.deb"
 POSTMAN_URL="https://dl.pstmn.io/download/latest/linux64"
 LIBINPUT_URL="http://github.com/bulletmark/libinput-gestures"
-NVM_URL="https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh"
+TOR_URL="https://dist.torproject.org/torbrowser/8.0.5/tor-browser-linux64-8.0.5_en-US.tar.xz"
 
 #########################################################################################
 #
@@ -349,7 +349,7 @@ install_gradle() {
 
         unzip -qq -d $OPTDIR $arch
         gradle_root=$(unzip -qql $arch | sed -r '1 {s/([ ]+[^ ]+){3}\s+//;q}')
-        chown -R $USERNAME $OPTDIR/$gradle_root
+        chown -R $USERNAME:$UGROUP $OPTDIR/$gradle_root
         echo 'export PATH="$PATH:/opt/'$gradle_root'bin"' >> $HOME/.profile
         source $HOME/.profile    
 
@@ -382,14 +382,14 @@ install_postman() {
         curl -# -o $arch $POSTMAN_URL
         printf "${INFO}\tUnpacking... ${NC}\n"
         tar xf $arch -C $OPTDIR
-        chown -R $USERNAME $OPTDIR/$(tar tzf $arch | sed -e 's@/.*@@' | uniq)
+        chown -R $USERNAME:$UGROUP $OPTDIR/$(tar tzf $arch | sed -e 's@/.*@@' | uniq)
       
         echo "[Desktop Entry]" > /usr/share/applications/postman.desktop
         echo "  Name=Postman" >> /usr/share/applications/postman.desktop
         echo "  Type=Application" >> /usr/share/applications/postman.desktop
         echo "  Exec=/opt/Postman/Postman" >> /usr/share/applications/postman.desktop
         echo "  Terminal=false" >> /usr/share/applications/postman.desktop
-        echo "  Icon=/opt/Postman/resources/app/assets/icon.png" >> /usr/share/applications/postman.desktop
+        echo "  Icon=/opt/Postman/app/resources/app/assets/icon.png" >> /usr/share/applications/postman.desktop
         echo "  Comment=" >> /usr/share/applications/postman.desktop
         echo "  NoDisplay=false" >> /usr/share/applications/postman.desktop
         echo "  Categories=Development;" >> /usr/share/applications/postman.desktop
@@ -426,6 +426,26 @@ install_libinput() {
     fi
 }
 
+install_tor() {
+    if [ ! $(ls $OPTDIR | grep 'Tor Browser') ]; then 
+        arch=tor_browser.tar.xz
+        
+        printf "${INFO}\tDownloading... ${NC}\n"
+        curl -# -o $arch $TOR_URL
+        printf "${INFO}\tUnpacking... ${NC}\n"
+        tar xf $arch -C $OPTDIR
+        folder_name=$(tar tJf $arch | sed -e 's@/.*@@' | uniq)
+        chown -R $USERNAME:$UGROUP $OPTDIR/$folder_name
+
+        cp $OPTDIR/$folder_name/start-tor-browser.desktop /usr/share/applications/
+        chmod 744 /usr/share/applications/start-tor-browser.desktop
+        sed -i 's|\"\$(dirname\s\"\$\*\")\"|'"$OPTDIR/$folder_name"'|g' /usr/share/applications/start-tor-browser.desktop
+
+        rm $arch
+    else
+        printf "${INFO}\tTor Browser is in place...${NC}\n"
+    fi
+}
 
 install_npm() {
     npm i -g npm >> $LOG 2>&1
@@ -602,10 +622,13 @@ case "$1" in
     "--libinput")
         SOURCE_SOFT=( libinput )  
         install_archives "${SOURCE_SOFT[@]}";;
+    "--tor")
+        SOURCE_SOFT=( tor )
+        install_archives "${SOURCE_SOFT[@]}";;
     "--config")
         configs;;
     *)
-        printf "${ALERT}Usage: elementary-setup [--all | --cleanup | --repos | -defaults | --custom | --nvidia | --skype | --postman | --gradle | --libinput | --config]\n"
+        printf "${ALERT}Usage: elementary-setup [--all | --cleanup | --repos | -defaults | --custom | --nvidia | --skype | --postman | --gradle | --libinput | --config | --tor]\n"
         printf "Running with no arguments is equal to --all. The script must be run as root. ${NC}\n";;
 esac
 
