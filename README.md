@@ -81,6 +81,19 @@ ln -s /usr/local/lib/python3.6/site-packages/cv2.cpython-36m-x86_64-linux-gnu.so
 ```
 
 ### Additional setup steps
- - Arrange Favorites in the Whisker menu
+ - Arrange Favorites in the Whisker menu:
+   - LibreOffice Writer
+   - LibreOffice Calc
+   - MATE Calculator
+   - Google Chrome
+   - Firefox Web Browser
+   - Postman
+   - Keepass
+   - Skype
  - Add System load, Workspace switcher panels on the system panel
- - Setup keyboard shortcuts
+ - Setup desctop icons
+ - Setup keyboard layout and shortcuts:
+   - exo-open --launch FileManager `Super+E`
+   - exo-open --launch TerminalEmulator `Super+T`
+   - /usr/bin/guake `Super+R`
+   - code `Super+C`
