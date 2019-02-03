@@ -28,10 +28,14 @@ ssh-add ~/.ssh/id_rsa
 
 ```bash
 # download cuda_<version>_linux.run
+sudo bash -c "echo blacklist nouveau > /etc/modprobe.d/blacklist-nvidia-nouveau.conf"
+sudo bash -c "echo options nouveau modeset=0 >> /etc/modprobe.d/blacklist-nvidia-nouveau.conf"
+echo 'export PATH="$PATH:/usr/local/cuda-<version>/bin"' >> ~/.profile
+echo 'export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/cuda-<version>/lib64"' >> ~/.profile
+sudo update-initramfs -u
+# reboot
 sudo init 3
-sudo ./cuda_<version>_linux.run --override
-echo 'PATH="$PATH:/usr/local/cuda-<version>/bin"' >> ~/.profile
-echo 'LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/cuda-<version>/lib64"' >> ~/.profile
+sudo ./cuda_<version>_linux.run
 # reboot
 cd ~/NVIDIA_CUDA-<version>_Samples
 make all -j5
