@@ -427,7 +427,7 @@ install_libinput() {
 }
 
 install_tor() {
-    if [ ! $(ls $OPTDIR | grep 'Tor Browser') ]; then 
+    if [ ! $(ls $OPTDIR | grep 'tor-browser') ]; then 
         arch=tor_browser.tar.xz
         
         printf "${INFO}\tDownloading... ${NC}\n"
