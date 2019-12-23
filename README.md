@@ -25,11 +25,6 @@ sudo ./xubuntu-setup.sh
   --repos
   --defaults
   --custom
-  --skype
-  --postman
-  --gradle
-  --libinput
-  --tor
   --config
 ```
 
