@@ -59,7 +59,7 @@
       <property name="&lt;Super&gt;c" type="string" value="code"/>
       <property name="&lt;Super&gt;s" type="string" value="skypeforlinux"/>
       <property name="&lt;Super&gt;l" type="string" value="xflock4"/>
-      <property name="&lt;Super&gt;t" type="string" value="/opt/Telegram/Telegram"/>
+      <property name="&lt;Super&gt;t" type="string" value="telegram-desktop"/>
     </property>
   </property>
   <property name="xfwm4" type="empty">
