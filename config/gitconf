@@ -1,0 +1,28 @@
+[user]
+  name = Oleg Musienko
+  email = Diogen737@gmail.com
+[gc]
+  autoDetach = false
+[color]
+  ui = true
+[core]
+  editor = vim
+[alias]
+  merc = merge --no-ff
+  st = status
+  hist = log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short -n 20
+[merge]
+  conflictstyle = diff3
+[color "branch"]
+  current = yellow reverse
+  local = yellow
+  remote = green
+[color "diff"]
+  meta = yellow bold
+  frag = magenta bold
+  old = red bold
+  new = green bold
+[color "status"]
+  added = yellow
+  changed = green
+  untracked = cyan

@@ -1,0 +1,32 @@
+[Default Applications]
+x-scheme-handler/postman=Postman.desktop
+application/x-shellscript=sublime_text.desktop
+text/x-log=sublime_text.desktop
+text/css=sublime_text.desktop
+application/javascript=sublime_text.desktop
+text/x-scss=sublime_text.desktop
+x-scheme-handler/tg=telegramdesktop.desktop
+application/xml=sublime_text.desktop
+
+[Added Associations]
+text/x-log=sublime_text.desktop;libreoffice-writer.desktop;
+application/x-shellscript=sublime_text.desktop;vim.desktop;
+application/vnd.openxmlformats-officedocument.spreadsheetml.sheet=libreoffice-calc.desktop;
+application/pdf=atril.desktop;
+image/png=gimp.desktop;ristretto.desktop;
+image/jpeg=ristretto.desktop;gimp.desktop;
+text/css=sublime_text.desktop;libreoffice-writer.desktop;
+video/x-matroska=org.xfce.Parole.desktop;
+application/javascript=sublime_text.desktop;libreoffice-writer.desktop;
+text/html=exo-web-browser.desktop;firefox.desktop;sublime_text.desktop;
+application/zip=engrampa.desktop;
+text/x-scss=sublime_text.desktop;
+font/ttf=org.gnome.font-viewer.desktop;
+font/woff=exo-file-manager.desktop;
+application/vnd.openxmlformats-officedocument.wordprocessingml.document=libreoffice-writer.desktop;
+image/vnd.microsoft.icon=ristretto.desktop;
+audio/mp4=org.xfce.Parole.desktop;
+image/bmp=ristretto.desktop;
+text/x-java=sublime_text.desktop;
+text/plain=sublime_text.desktop;
+application/xml=sublime_text.desktop;exo-web-browser.desktop;
