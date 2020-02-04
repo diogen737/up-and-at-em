@@ -37,7 +37,7 @@ MAKEDIR=./linux-distr
 LOG=./setup.log
 
 JUNKDIRS=( $HM/Videos $HM/Pictures $HM/Music $HM/Documents )
-WORKDIRS=( $HM/sharespace $HM/dev $HM/dev/java $HM/dev/android
+WORKDIRS=( $HM/sharespace $HM/dev $HM/dev/java $HM/dev/android $HM/.config
            $HM/dev/shell $HM/dev/python $HM/dev/web $HM/.npm-global $MAKEDIR  )
 
 #########################################################################################
@@ -487,7 +487,6 @@ configs() {
         if [[ ! -d $i ]]; then
             mkdir $i
             chown -R $UNAME:$UGROUP $i
-            chmod -R 775 $i
         fi
     done
 
