@@ -62,11 +62,11 @@ LIBS="libcurl4-openssl-dev libssl-dev libc6:i386 libncurses5:i386
 DEV="build-essential openjdk-$JDK_VER-jdk ant maven vim"
 
 UTILS="htop pkg-config software-properties-gtk gdb m4
-       python3-software-properties software-properties-common mesa-utils 
+       python3-software-properties software-properties-common mesa-utils
        apt-transport-https ca-certificates mesa-utils-extra xserver-xorg-dev
        ssh curl nfs-kernel-server nfs-common seahorse unzip unrar keepass2
        postgresql postgresql-contrib pgadmin3 xdotool cmake
-       python-pip python3-pip telegram-desktop virtualbox"
+       python3-pip telegram-desktop virtualbox"
 
 CUSTOM_SOFT="git google-chrome-stable sublime-text docker-ce
              gimp gimp-data gimp-plugin-registry gimp-data-extras
@@ -74,7 +74,7 @@ CUSTOM_SOFT="git google-chrome-stable sublime-text docker-ce
 
 PURGE_SOFT="modemmanager pidgin catfish gnome-mines
             gnome-sudoku xfburn gigolo mousepad thunderbird
-            sgt-launcher sgt-puzzles" 
+            sgt-launcher sgt-puzzles"
 
 #########################################################################################
 #
