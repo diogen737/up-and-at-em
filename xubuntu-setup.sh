@@ -84,11 +84,11 @@ PURGE_SOFT="modemmanager pidgin catfish gnome-mines
 
 SOURCE_SOFT=( gradle skype postman npm tor zoom )
 
-GRADLE_URL="https://downloads.gradle-dn.com/distributions/gradle-6.0.1-all.zip"
+GRADLE_URL="https://downloads.gradle-dn.com/distributions/gradle-6.5-all.zip"
 SKYPE_URL="https://repo.skype.com/latest/skypeforlinux-64.deb"
 POSTMAN_URL="https://dl.pstmn.io/download/latest/linux64"
-TOR_URL="https://dist.torproject.org/torbrowser/9.0.2/tor-browser-linux64-9.0.2_en-US.tar.xz"
-ZOOM_URL="https://d11yldzmag5yn.cloudfront.net/prod/3.5.336627.1216/zoom_amd64.deb"
+TOR_URL="https://dist.torproject.org/torbrowser/9.5/tor-browser-linux64-9.5_en-US.tar.xz"
+ZOOM_URL="https://d11yldzmag5yn.cloudfront.net/prod/5.1.412382.0614/zoom_amd64.deb"
 
 #########################################################################################
 #
