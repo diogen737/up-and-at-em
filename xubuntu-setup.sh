@@ -66,7 +66,7 @@ UTILS="htop pkg-config software-properties-gtk gdb m4
        apt-transport-https ca-certificates mesa-utils-extra xserver-xorg-dev
        ssh curl nfs-kernel-server nfs-common seahorse unzip unrar keepass2
        postgresql postgresql-contrib pgadmin3 xdotool cmake
-       python3-pip telegram-desktop virtualbox"
+       python3-pip telegram-desktop virtualbox hardinfo"
 
 CUSTOM_SOFT="git google-chrome-stable sublime-text docker-ce
              gimp gimp-data gimp-plugin-registry gimp-data-extras
@@ -84,11 +84,11 @@ PURGE_SOFT="modemmanager pidgin catfish gnome-mines
 
 SOURCE_SOFT=( gradle skype postman npm tor zoom )
 
-GRADLE_URL="https://downloads.gradle-dn.com/distributions/gradle-6.5-all.zip"
+GRADLE_URL="https://downloads.gradle-dn.com/distributions/gradle-6.6.1-all.zip"
 SKYPE_URL="https://repo.skype.com/latest/skypeforlinux-64.deb"
 POSTMAN_URL="https://dl.pstmn.io/download/latest/linux64"
-TOR_URL="https://dist.torproject.org/torbrowser/9.5/tor-browser-linux64-9.5_en-US.tar.xz"
-ZOOM_URL="https://d11yldzmag5yn.cloudfront.net/prod/5.1.412382.0614/zoom_amd64.deb"
+TOR_URL="https://dist.torproject.org/torbrowser/9.5.4/tor-browser-linux64-9.5.4_en-US.tar.xz"
+ZOOM_URL="https://d11yldzmag5yn.cloudfront.net/prod/5.2.454870.0831/zoom_amd64.deb"
 
 #########################################################################################
 #
