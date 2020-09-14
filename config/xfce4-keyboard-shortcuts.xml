@@ -62,6 +62,7 @@
       <property name="&lt;Super&gt;l" type="string" value="xflock4"/>
       <property name="&lt;Super&gt;t" type="string" value="telegram-desktop"/>
       <property name="&lt;Super&gt;F12" type="string" value="mate-calculator"/>
+      <property name="&lt;Super&gt;k" type="string" value="keepass2"/>
     </property>
   </property>
   <property name="xfwm4" type="empty">

@@ -82,6 +82,7 @@
         <value type="string" value="update-notifier"/>
       </property>
       <property name="names-ordered" type="array">
+        <value type="string" value="task manager"/>
         <value type="string" value="thunar"/>
         <value type="string" value="update-notifier"/>
         <value type="string" value="blueman-tray"/>
@@ -101,7 +102,7 @@
       <property name="enable-keyboard-shortcuts" type="bool" value="true"/>
       <property name="enable-mpris" type="bool" value="true"/>
       <property name="mixer-command" type="string" value="pavucontrol"/>
-      <property name="mpris-players" type="string" value="chrome.instance1833;chrome.instance1838;chrome.instance1844;chrome.instance1846;chrome.instance1848;chrome.instance2773;chrome.instance3619;parole"/>
+      <property name="mpris-players" type="string" value="chrome.instance1833;chrome.instance1834;chrome.instance1838;chrome.instance1844;chrome.instance1846;chrome.instance1848;chrome.instance27258;chrome.instance2773;chrome.instance2784;chrome.instance3619;chrome.instance62458;parole"/>
       <property name="show-notifications" type="bool" value="true"/>
     </property>
     <property name="plugin-10" type="string" value="separator">
@@ -130,7 +131,7 @@
     </property>
     <property name="plugin-20" type="string" value="pulseaudio">
       <property name="enable-keyboard-shortcuts" type="bool" value="true"/>
-      <property name="mpris-players" type="string" value="chrome.instance1833;chrome.instance1838;chrome.instance1844;chrome.instance1846;chrome.instance1848;chrome.instance2773;chrome.instance3619;parole"/>
+      <property name="mpris-players" type="string" value="chrome.instance1833;chrome.instance1834;chrome.instance1838;chrome.instance1844;chrome.instance1846;chrome.instance1848;chrome.instance27258;chrome.instance2773;chrome.instance2784;chrome.instance3619;chrome.instance62458;parole"/>
     </property>
     <property name="plugin-21" type="string" value="separator">
       <property name="expand" type="bool" value="false"/>
