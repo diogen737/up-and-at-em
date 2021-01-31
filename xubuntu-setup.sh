@@ -84,11 +84,11 @@ PURGE_SOFT="modemmanager pidgin catfish gnome-mines
 
 SOURCE_SOFT=( gradle skype postman npm tor zoom )
 
-GRADLE_URL="https://downloads.gradle-dn.com/distributions/gradle-6.6.1-all.zip"
+GRADLE_URL="https://downloads.gradle-dn.com/distributions/gradle-6.8.1-all.zip"
 SKYPE_URL="https://repo.skype.com/latest/skypeforlinux-64.deb"
 POSTMAN_URL="https://dl.pstmn.io/download/latest/linux64"
-TOR_URL="https://dist.torproject.org/torbrowser/9.5.4/tor-browser-linux64-9.5.4_en-US.tar.xz"
-ZOOM_URL="https://d11yldzmag5yn.cloudfront.net/prod/5.2.454870.0831/zoom_amd64.deb"
+TOR_URL="https://dist.torproject.org/torbrowser/10.0.9/tor-browser-linux64-10.0.9_en-US.tar.xz"
+ZOOM_URL="https://cdn.zoom.us/prod/5.4.57862.0110/zoom_amd64.deb"
 
 #########################################################################################
 #
@@ -278,45 +278,6 @@ install_customs() {
 
 #########################################################################################
 #
-# Install nvidia graphics drivers
-# Out of use because binary distribution installation on init 3 level is more reliable
-# (Didn't delete this code jus because I like it)
-#
-#########################################################################################
-
-# install_nvidia() {
-#     if ! dpkg -l | grep nvidia > /dev/null; then
-# 	    read -p "Do you want to install NVIDIA drivers? " -n 1 -r
-# 	    echo
-#     	if [[ $REPLY =~ ^[Yy]$ ]]
-#     	then	
-# 	    	printf "${INFO} - Installing graphics drivers...${NC}\n"
-# 	        printf "${INFO}\tAvailable driver versions:\n"
-# 	        printf "========================\n"
-# 	        apt-cache search ^nvidia-[0-9] | grep -vE 'dev|updates|headless|uvm'
-# 	        printf "========================${NC}"
-# 	        RC=1
-# 	        ERR_MSG=""
-# 	        while [ $RC -ne 0 ]; do
-# 	            echo -e $ERR_MSG
-# 	            printf "${INFO}\tPick a version: ${NC}"
-# 	            read ver
-# 	            run-one-line "apt-get install nvidia-$ver nvidia-settings -y"
-# 	            RC=$?
-# 	            ERR_MSG="${ALERT}\r\033[K\tWrong driver version${NC}"
-# 	        done
-# 	        printf "${INFO}\tInstallation complete. Configuring...${NC}\n"
-# 	        nvidia-xconfig >> $LOG 2>&1
-# 	        touch /var/run/reboot-required # just to be sure because we need reboot
-# 	        check_reboot
-#     	fi
-#     else
-#         printf "${INFO}\tThe driver is already installed${NC}\n"
-#     fi
-# }
-
-#########################################################################################
-#
 # Install soft from source destribution (extract & run)
 #
 #########################################################################################
@@ -500,6 +461,9 @@ configs() {
 #
 #########################################################################################
 
+# Set Ubuntu packages source from main server
+sed -i 's|http://us.|http://|g' /etc/apt/sources.list
+sed -i 's|http://ru.|http://|g' /etc/apt/sources.list
 
 if [[ $EUID -ne "0" ]]; then
     printf "${ALERT}The script must be run as root. Abort. ${NC}\n"
@@ -518,9 +482,6 @@ printf "========================\n"
 
 case "$1" in
     ""|"--all")
-        # Set Ubuntu packages source from main server
-        sed -i 's|http://us.|http://|g' /etc/apt/sources.list
-        sed -i 's|http://ru.|http://|g' /etc/apt/sources.list
         # Launch procedures 
         cleanup
         upgrade
