@@ -44,6 +44,8 @@ add_repos() {
     rpm -v --import https://download.sublimetext.com/sublimehq-rpm-pub.gpg
     dnf config-manager --add-repo https://download.sublimetext.com/rpm/stable/x86_64/sublime-text.repo
     dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
+    dnf copr enable atim/bottom -y
+    dnf copr enable atim/gping -y
 }
 
 fetch_packages() {
@@ -80,7 +82,8 @@ install_dnf() {
     echo
     dnf install -y @development-tools snapd binutils dconf dconf-editor autoconf automake libtool openssl gfortran ibus \
         wmctrl ant maven vim make automake gcc g++ kernel-devel htop gdb unzip postgresql postgresql-contrib pgadmin3 cmake \
-        dnf-plugins-core sublime-text docker-ce docker-ce-cli containerd.io keepass gnome-tweak-tool \
+        dnf-plugins-core sublime-text docker-ce docker-ce-cli containerd.io keepass gnome-tweak-tool lsd bottom hyperfine \
+        gping procs httpie bat \
         ./google-chrome.rpm ./virtualbox.rpm ./zoom.rpm
     # `classic` snap support
     ln -s /var/lib/snapd/snap /snap
@@ -173,6 +176,10 @@ configs() {
     cp $WORKDIR/config/fedora/dconf.user $HM/.config/dconf/user
     chmod 644 $HM/.config/dconf/user
     chown $UNAME:$UGROUP $HM/.config/dconf/user
+
+    #Other configs
+    mkdir -p $HM/.config/lsd
+    cp $WORKDIR/config/fedora/lsd.config.yml $HM/.config/lsd/config.yml
 
     #SSH config
     SSH_DIR=$HM/.ssh

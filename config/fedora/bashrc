@@ -1,5 +1,10 @@
 
 # custom aliases
+alias ls='lsd'
+alias l='ls -l'
+alias la='ls -la'
+alias lt='ls --tree'
+
 alias upd='sudo dnf update'
 alias gh='git hist'
 alias dirsize='du -hs'
