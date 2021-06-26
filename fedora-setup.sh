@@ -109,7 +109,7 @@ install_snaps() {
         if [[ $snap_code = 0 ]]; then
             snap_available=1
         else
-            printf "${INFO} Waiting for the snap seed service to terminate...${NC}\n"
+            printf "${INFO} Waiting for the snap service to initialize...${NC}\n"
             sleep 5
         fi
     done
@@ -117,8 +117,6 @@ install_snaps() {
     if [[ $to_install -ne 0 ]]; then
         printf "${INFO} - Installing software from snap: ${NC}\n"
         echo
-        printf "${INFO}   - snap core${NC}\n"
-        snap install core
         printf "${INFO}   - vscode${NC}\n"
         snap install --classic code
         printf "${INFO}   - telegram${NC}\n"
@@ -128,7 +126,7 @@ install_snaps() {
         printf "${INFO}   - postman${NC}\n"
         snap install postman
     else
-        printf "${ALERT} - Snap service is npt available at the moment, please try to run the snap installation later by running 'sudo ./fedora-setup.sh --install_defaults'. ${NC}\n"
+        printf "${ALERT} - Snap service is not available at the moment, please try to run the snap installation later by running 'sudo ./fedora-setup.sh --install_defaults'. ${NC}\n"
     fi
 }
 
@@ -218,42 +216,44 @@ print_usage() {
     printf "The script must be run as root.\n"
 }
 
-install_snaps
+if [[ $EUID -ne "0" ]]; then
+    print_usage
+    exit 1
+fi
 
-# if [[ $EUID -ne "0" ]]; then
-#     print_usage
-#     exit 1
-# fi
+valid_args=("" "--all" "-r" "--repos" "-p" "--install_from_pm" "-s" "--install_from_source")
+if [[ ! " ${valid_args[@]} " =~ " $1 " ]]; then
+    print_usage
+    exit 1
+fi
 
-# valid_args=("" "--all" "-r" "--repos" "-p" "--install_from_pm" "-s" "--install_from_source")
-# if [[ ! " ${valid_args[@]} " =~ " $1 " ]]; then
-#     print_usage
-#     exit 1
-# fi
+echo
+hostnamectl
 
-# echo
-# hostnamectl
+mkdir -p $HM/fedora-setup
+chown -R $UNAME:$UGROUP $HM/fedora-setup
+pushd $HM/fedora-setup/ > /dev/null
 
-# mkdir -p $HM/fedora-setup
-# chown -R $UNAME:$UGROUP $HM/fedora-setup
-# pushd $HM/fedora-setup/ > /dev/null
+case "$1" in
+    ""|"--all")
+        update
+        add_repos
+        fetch_packages
+        install_dnf
+        install_customs
+        install_snaps
+        configs;;
+    "-r"|"--repos")
+        add_repos;;
+    "-p"|"--install_from_pm")
+        install_dnf
+        install_snaps;;
+    "-s"|"--install_from_source")
+        install_customs;;
+esac
 
-# case "$1" in
-#     ""|"--all")
-#         update
-#         add_repos
-#         fetch_packages
-#         install_dnf
-#         install_customs
-#         install_snaps
-#         configs;;
-#     "-r"|"--repos")
-#         add_repos;;
-#     "-p"|"--install_from_pm")
-#         install_dnf
-#         install_snaps;;
-#     "-s"|"--install_from_source")
-#         install_customs;;
-# esac
+popd > /dev/null
 
-# popd > /dev/null
+echo
+printf "${INFO} Done!${NC}\n"
+echo
