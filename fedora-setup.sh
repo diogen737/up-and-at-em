@@ -91,19 +91,26 @@ install_dnf() {
 
 install_snaps() {
     echo
-    tries=20
+    tries=15
     to_install=1
-    while systemctl is-active --quiet snapd.seeded.service
+    snap_available=0
+    while [[ "$snap_available" = 0 ]]
     do
-        printf "${INFO} Waiting for the snap seed service to terminate...${NC}\n"
-
-        sleep 5
         tries=$tries-1
-
         if [[ $tries -le 0 ]]; then
             # reset the flag, don't install snap packages
             to_install=0
             break
+        fi
+
+        snap install core
+        snap_code=$?
+
+        if [[ $snap_code = 0 ]]; then
+            snap_available=1
+        else
+            printf "${INFO} Waiting for the snap seed service to terminate...${NC}\n"
+            sleep 5
         fi
     done
 
@@ -121,7 +128,7 @@ install_snaps() {
         printf "${INFO}   - postman${NC}\n"
         snap install postman
     else
-        printf "${ALERT} - Snap seed service is still running, please try to run the snap installation later by running 'sudo ./fedora-setup.sh --install_defaults'. ${NC}\n"
+        printf "${ALERT} - Snap service is npt available at the moment, please try to run the snap installation later by running 'sudo ./fedora-setup.sh --install_defaults'. ${NC}\n"
     fi
 }
 
@@ -211,40 +218,42 @@ print_usage() {
     printf "The script must be run as root.\n"
 }
 
-if [[ $EUID -ne "0" ]]; then
-    print_usage
-    exit 1
-fi
+install_snaps
 
-valid_args=("" "--all" "-r" "--repos" "-p" "--install_from_pm" "-s" "--install_from_source")
-if [[ ! " ${valid_args[@]} " =~ " $1 " ]]; then
-    print_usage
-    exit 1
-fi
+# if [[ $EUID -ne "0" ]]; then
+#     print_usage
+#     exit 1
+# fi
 
-echo
-hostnamectl
+# valid_args=("" "--all" "-r" "--repos" "-p" "--install_from_pm" "-s" "--install_from_source")
+# if [[ ! " ${valid_args[@]} " =~ " $1 " ]]; then
+#     print_usage
+#     exit 1
+# fi
 
-mkdir -p $HM/fedora-setup
-chown -R $UNAME:$UGROUP $HM/fedora-setup
-pushd $HM/fedora-setup/ > /dev/null
+# echo
+# hostnamectl
 
-case "$1" in
-    ""|"--all")
-        update
-        add_repos
-        fetch_packages
-        install_dnf
-        install_customs
-        install_snaps
-        configs;;
-    "-r"|"--repos")
-        add_repos;;
-    "-p"|"--install_from_pm")
-        install_dnf
-        install_snaps;;
-    "-s"|"--install_from_source")
-        install_customs;;
-esac
+# mkdir -p $HM/fedora-setup
+# chown -R $UNAME:$UGROUP $HM/fedora-setup
+# pushd $HM/fedora-setup/ > /dev/null
 
-popd > /dev/null
+# case "$1" in
+#     ""|"--all")
+#         update
+#         add_repos
+#         fetch_packages
+#         install_dnf
+#         install_customs
+#         install_snaps
+#         configs;;
+#     "-r"|"--repos")
+#         add_repos;;
+#     "-p"|"--install_from_pm")
+#         install_dnf
+#         install_snaps;;
+#     "-s"|"--install_from_source")
+#         install_customs;;
+# esac
+
+# popd > /dev/null
