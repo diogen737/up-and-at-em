@@ -5,7 +5,7 @@ alias gh='git hist'
 alias nvidia-ver='nvidia-settings -q NvidiaDriverVersion'
 alias dirsize='du -hs'
 npm_i_g() {
-	pushd ~/.nvm/versions/node/v10.19.0/lib/
+	pushd ~/.nvm/versions/node/$(nvm current)/lib/
 	npm i "$@"
 	popd
 }

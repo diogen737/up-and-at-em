@@ -293,7 +293,7 @@ install_gradle() {
         gradle_root=$(unzip -qql $arch | sed -r '1 {s/([ ]+[^ ]+){3}\s+//;q}')
         chown -R $UNAME:$UGROUP $OPTDIR/$gradle_root
         echo 'export PATH="$PATH:/opt/'$gradle_root'bin"' >> $HM/.profile
-        source $HM/.profile    
+        source $HM/.profile
 
         rm $arch
     else
@@ -422,20 +422,20 @@ configs() {
 
     # Custom aliases
     if [[ ! $(cat $HM/.bashrc | grep 'custom aliases') ]]; then
-        cat ./config/bashrc >> $HM/.bashrc
+        cat ./config/xubuntu/bashrc >> $HM/.bashrc
     fi
 
     # Customized configs for desktop, keyboard, etc.
     cat ./config/gitconf > $HM/.gitconfig
-    cat ./config/helpers.rc > $HM/.config/xfce4/helpers.rc
-    cat ./config/keyboard-layout.xml > $HM/.config/xfce4/xfconf/xfce-perchannel-xml/keyboard-layout.xml
-    cat ./config/mimeapps.list > $HM/.config/mimeapps.list
+    cat ./config/xubuntu/helpers.rc > $HM/.config/xfce4/helpers.rc
+    cat ./config/xubuntu/keyboard-layout.xml > $HM/.config/xfce4/xfconf/xfce-perchannel-xml/keyboard-layout.xml
+    cat ./config/xubuntu/mimeapps.list > $HM/.config/mimeapps.list
     mkdir $HM/.config/xfce4/panel/
-    cat ./config/whiskermenu-7.rc > $HM/.config/xfce4/panel/whiskermenu-7.rc
-    cat ./config/xfce4-desktop.xml > $HM/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml
-    cat ./config/xfce4-keyboard-shortcuts.xml > $HM/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-keyboard-shortcuts.xml
-    cat ./config/xfce4-panel.xml > $HM/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml
-    cat ./config/terminalrc > $HM/.config/xfce4/terminal/terminalrc
+    cat ./config/xubuntu/whiskermenu-7.rc > $HM/.config/xfce4/panel/whiskermenu-7.rc
+    cat ./config/xubuntu/xfce4-desktop.xml > $HM/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml
+    cat ./config/xubuntu/xfce4-keyboard-shortcuts.xml > $HM/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-keyboard-shortcuts.xml
+    cat ./config/xubuntu/xfce4-panel.xml > $HM/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml
+    cat ./config/xubuntu/terminalrc > $HM/.config/xfce4/terminal/terminalrc
     sed -i -E "s|MiscDefaultGeometry=([0-9]+)x([0-9]+)|MiscDefaultGeometry=${TERMINAL_COLUMNS}x${TERMINAL_LINES}|" $HM/.config/xfce4/terminal/terminalrc
 
     printf "${INFO} - Setting up directories...${NC}\n"
@@ -461,19 +461,32 @@ configs() {
 #
 #########################################################################################
 
+print_usage() {
+    printf "Usage: sudo ./fedora-setup.sh [OPTION]\n\n"
+    printf "Options:\n"
+    printf "\t--all (or no options) - perform all tasks\n"
+    printf "\t-c, --cleanup - purge unused packages\n"
+    printf "\t-r, --repos - add 3rd party repositories\n"
+    printf "\t-p, --install_from_pm - install software using standard package managers\n"
+    printf "\t-s, --install_from_source - install software from sources\n"
+    printf "The script must be run as root.\n"
+}
+
+if [[ $EUID -ne "0" ]]; then
+    print_usage
+    exit 1
+fi
+
+valid_args=("" "--all" "-c" "--cleanup" "-r" "--repos" "-p" "--install_from_pm" "-s" "--install_from_source")
+if [[ ! " ${valid_args[@]} " =~ " $1 " ]]; then
+    print_usage
+    exit 1
+fi
+
 # Set Ubuntu packages source from main server
 sed -i 's|http://us.|http://|g' /etc/apt/sources.list
 sed -i 's|http://ru.|http://|g' /etc/apt/sources.list
 
-if [[ $EUID -ne "0" ]]; then
-    printf "${ALERT}The script must be run as root. Abort. ${NC}\n"
-    exit 1
-fi
-
-if [[ $(lsb_release -i) =~ "Distributor ID: Ubuntu" ]]; then
-    printf "${ALERT}This script is for Ubuntu systems only. Abort. ${NC}\n"
-    exit 1
-fi
 
 printf "${INFO}========================\n"
 printf "Ubuntu system:\n"
@@ -494,19 +507,16 @@ case "$1" in
         # Ensure we go to reboot
         touch /var/run/reboot-required
         check_reboot;;
-    "--cleanup")
+    "-c"|"--cleanup")
         cleanup;;
-    "--repos")
+    "-r"|"--repos")
         add_repos;;
-    "--defaults")
-        install_defaults;;
-    "--custom")
+    "-p"|"--install_from_pm")
+        install_defaults
         install_customs;;
-    "--config")
-        configs;;
-    *)
-        printf "${ALERT}Usage: xubuntu-setup [--all | --cleanup | --repos | --defaults | --custom | --config]\n"
-        printf "Running with no arguments is equal to --all. The script must be run as root. ${NC}\n";;
+    "-s"|"--install_from_source")
+        upgrade
+        install_archives "${SOURCE_SOFT[@]}";;
 esac
 
 # Restore access to local config store
