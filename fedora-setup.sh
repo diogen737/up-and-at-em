@@ -63,15 +63,15 @@ fetch_packages() {
     fi
     if [[ ! -f "zoom.rpm" ]]; then
         printf "${INFO}   - zoom.rpm${NC}\n"
-        curl -# -o zoom.rpm https://cdn.zoom.us/prod/5.6.22045.0607/zoom_x86_64.rpm
+        curl -# -o zoom.rpm https://cdn.zoom.us/prod/5.7.25958.0621/zoom_x86_64.rpm
     fi
     if [[ ! -f "gradle.zip" ]]; then
         printf "${INFO}   - gradle.zip${NC}\n"
-        curl -# -o gradle.zip https://downloads.gradle-dn.com/distributions/gradle-7.0.2-all.zip
+        curl -# -o gradle.zip https://downloads.gradle-dn.com/distributions/gradle-7.1-all.zip
     fi
     if [[ ! -f "tor.tar.xz" ]]; then
         printf "${INFO}   - tor.tar.xz${NC}\n"
-        curl -# -o tor.tar.xz https://dist.torproject.org/torbrowser/10.0.17/tor-browser-linux64-10.0.17_en-US.tar.xz
+        curl -# -o tor.tar.xz https://dist.torproject.org/torbrowser/10.0.18/tor-browser-linux64-10.0.18_en-US.tar.xz
     fi
     chown -R $UNAME:$UGROUP ./*
 }
