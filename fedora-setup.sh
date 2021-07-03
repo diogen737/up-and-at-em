@@ -26,19 +26,29 @@ HM=/home/$UNAME
 WORKDIR=$(pwd)
 
 #########################################################################################
+# Repositories & soft list
+#########################################################################################
+
+DNF_SOFT="@development-tools snapd binutils dconf dconf-editor autoconf automake libtool openssl gfortran ibus
+          wmctrl ant maven vim make automake gcc g++ kernel-devel htop gdb unzip postgresql postgresql-contrib pgadmin3 cmake
+          dnf-plugins-core sublime-text docker-ce docker-ce-cli containerd.io keepass gnome-tweak-tool lsd bottom hyperfine
+          gping procs httpie bat
+          ./google-chrome.rpm ./virtualbox.rpm ./zoom.rpm"
+
+#########################################################################################
 # Routines
 #########################################################################################
 
 update() {
     echo
-    printf "${INFO} - Updating default packages: ${NC}\n"
+    printf "${INFO} - Updating default packages:${NC}\n"
     echo
     dnf update -y
 }
 
 add_repos() {
     echo
-    printf "${INFO} - Adding custom repositories: ${NC}\n"
+    printf "${INFO} - Adding custom repositories:${NC}\n"
     echo
 
     rpm -v --import https://download.sublimetext.com/sublimehq-rpm-pub.gpg
@@ -50,7 +60,7 @@ add_repos() {
 
 fetch_packages() {
     echo
-    printf "${INFO} - Downloading additional packages: ${NC}\n"
+    printf "${INFO} - Downloading additional packages:${NC}\n"
     echo
 
     if [[ ! -f "google-chrome.rpm" ]]; then
@@ -61,14 +71,6 @@ fetch_packages() {
         printf "${INFO}   - virtualbox.rpm${NC}\n"
         curl -# -o virtualbox.rpm https://download.virtualbox.org/virtualbox/6.1.22/VirtualBox-6.1-6.1.22_144080_fedora33-1.x86_64.rpm
     fi
-    if [[ ! -f "zoom.rpm" ]]; then
-        printf "${INFO}   - zoom.rpm${NC}\n"
-        curl -# -o zoom.rpm https://cdn.zoom.us/prod/5.7.25958.0621/zoom_x86_64.rpm
-    fi
-    if [[ ! -f "gradle.zip" ]]; then
-        printf "${INFO}   - gradle.zip${NC}\n"
-        curl -# -o gradle.zip https://downloads.gradle-dn.com/distributions/gradle-7.1-all.zip
-    fi
     if [[ ! -f "tor.tar.xz" ]]; then
         printf "${INFO}   - tor.tar.xz${NC}\n"
         curl -# -o tor.tar.xz https://dist.torproject.org/torbrowser/10.0.18/tor-browser-linux64-10.0.18_en-US.tar.xz
@@ -78,13 +80,13 @@ fetch_packages() {
 
 install_dnf() {
     echo
-    printf "${INFO} - Installing software from repositories: ${NC}\n"
+    printf "${INFO} - Installing software from repositories:${NC}\n"
     echo
     dnf install -y @development-tools snapd binutils dconf dconf-editor autoconf automake libtool openssl gfortran ibus \
         wmctrl ant maven vim make automake gcc g++ kernel-devel htop gdb unzip postgresql postgresql-contrib pgadmin3 cmake \
         dnf-plugins-core sublime-text docker-ce docker-ce-cli containerd.io keepass gnome-tweak-tool lsd bottom hyperfine \
         gping procs httpie bat \
-        ./google-chrome.rpm ./virtualbox.rpm ./zoom.rpm
+        ./google-chrome.rpm ./virtualbox.rpm
     # `classic` snap support
     ln -s /var/lib/snapd/snap /snap
 }
@@ -115,7 +117,7 @@ install_snaps() {
     done
 
     if [[ $to_install -ne 0 ]]; then
-        printf "${INFO} - Installing software from snap: ${NC}\n"
+        printf "${INFO} - Installing software from snap:${NC}\n"
         echo
         printf "${INFO}   - vscode${NC}\n"
         snap install --classic code
@@ -125,14 +127,16 @@ install_snaps() {
         snap install skype
         printf "${INFO}   - postman${NC}\n"
         snap install postman
+        printf "${INFO}   - gradle${NC}\n"
+        snap install gradle --classic
     else
-        printf "${ALERT} - Snap service is not available at the moment, please try to run the snap installation later by running 'sudo ./fedora-setup.sh --install_defaults'. ${NC}\n"
+        printf "${ALERT} - Snap service is not available at the moment, please try to run the snap installation later by running 'sudo ./fedora-setup.sh --install_defaults'.${NC}\n"
     fi
 }
 
 install_customs() {
     echo
-    printf "${INFO} - Installing software from archives: ${NC}\n"
+    printf "${INFO} - Installing software from archives:${NC}\n"
     echo
 
     # Custom NVM install
@@ -146,19 +150,11 @@ install_customs() {
     cp $OPTDIR/$folder_name/start-tor-browser.desktop /usr/share/applications/
     chmod 744 /usr/share/applications/start-tor-browser.desktop
     sed -i 's|\"\$(dirname\s\"\$\*\")\"|'"$OPTDIR/$folder_name"'|g' /usr/share/applications/start-tor-browser.desktop
-
-    # Custom Gradle install
-    arch=gradle.zip
-    unzip -qq -d $OPTDIR $arch
-    gradle_root=$(unzip -qql $arch | sed -r '1 {s/([ ]+[^ ]+){3}\s+//;q}')
-    chown -R $UNAME:$UGROUP $OPTDIR/$gradle_root
-    echo 'export PATH="$PATH:/opt/'$gradle_root'bin"' >> $HM/.bashrc
-    source $HM/.bashrc
 }
 
 configs() {
     echo
-    printf "${INFO} - Setting up configs: ${NC}\n"
+    printf "${INFO} - Setting up configs:${NC}\n"
     echo
 
     # Display line numbers in vim
@@ -177,14 +173,9 @@ configs() {
     cat $WORKDIR/config/gitconf > $HM/.gitconfig
     chown $UNAME:$UGROUP $HM/.gitconfig
 
-    # Restore Gnome settings
-    cp $WORKDIR/config/fedora/dconf.user $HM/.config/dconf/user
-    chmod 644 $HM/.config/dconf/user
-    chown $UNAME:$UGROUP $HM/.config/dconf/user
-
     #Other configs
     mkdir -p $HM/.config/lsd
-    cp $WORKDIR/config/fedora/lsd.config.yml $HM/.config/lsd/config.yml
+    cp $WORKDIR/config/lsd.config.yml $HM/.config/lsd/config.yml
 
     #SSH config
     SSH_DIR=$HM/.ssh
@@ -198,8 +189,13 @@ configs() {
         chmod 600 $SSH_DIR/id_rsa.pub
         chmod 600 $SSH_DIR/config
     else
-        printf "${ALERT} - SSH directory not found in the home directory. Did you forget to put it there? ${INFO}Continue: ${NC}\n"
+        printf "${ALERT} - SSH directory not found in the home directory. Did you forget to put it there? ${INFO}Continue:${NC}\n"
     fi
+
+    # Restore Gnome settings
+    cp $WORKDIR/config/fedora/dconf.user $HM/.config/dconf/user
+    chmod 644 $HM/.config/dconf/user
+    chown $UNAME:$UGROUP $HM/.config/dconf/user
 }
 
 #########################################################################################

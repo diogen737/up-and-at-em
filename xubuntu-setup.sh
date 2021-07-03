@@ -1,9 +1,7 @@
 #!/bin/bash
 
 #########################################################################################
-#
 # Control codes for colored output
-#
 #########################################################################################
 
 INFO=$(tput setaf 6)
@@ -12,437 +10,275 @@ HIGH=$(tput setaf 5)
 NC=$(tput sgr0)
 
 #########################################################################################
-#
 # System vars
-#
 #########################################################################################
 
 UNAME=$(env | grep SUDO_USER | sed 's/.*=//')    # name of the sudo user
 UGROUP=$(id -gn $UNAME)                          # name of the sudo group
 CORES=$(nproc)                                   # number of physical cores
-SCREEN_WIDTH=$(xrandr --current | grep '*' | uniq | awk '{print $1}' | cut -d 'x' -f1)
-SCREEN_HEIGHT=$(xrandr --current | grep '*' | uniq | awk '{print $1}' | cut -d 'x' -f2)
-TERMINAL_COLUMNS=$(tput cols)
-TERMINAL_LINES=$(tput lines)
 
 #########################################################################################
-#
-# Some working paths
-#
+# Working paths
 #########################################################################################
 
 OPTDIR=/opt
 HM=/home/$UNAME
-MAKEDIR=./linux-distr
-LOG=./setup.log
-
-JUNKDIRS=( $HM/Videos $HM/Pictures $HM/Music $HM/Documents )
-WORKDIRS=( $HM/sharespace $HM/dev $HM/dev/java $HM/dev/android $HM/.config
-           $HM/dev/shell $HM/dev/python $HM/dev/web $HM/.npm-global $MAKEDIR  )
+WORKDIR=$(pwd)
 
 #########################################################################################
-#
 # Repositories & soft list
-#
 #########################################################################################
 
-JDK_VER="14"
+JDK_VER="16"
 
-CORE="binutils autoconf automake libtool checkinstall openssl"
-
-LIBS="libcurl4-openssl-dev libssl-dev libc6:i386 libncurses5:i386
-      libstdc++6:i386 lib32z1 libbz2-1.0:i386 libgtk2.0-dev libgtk-3-dev
-      libavcodec-dev libavformat-dev libswscale-dev libv4l-dev libxvidcore-dev
-      libx264-dev libtbb2 libtbb-dev libjpeg-dev libpng-dev libv4l-dev
-      libtiff5-dev libdc1394-22-dev libatlas-base-dev gfortran ibus wmctrl
-      tcl-dev tk-dev python-tk python3-tk libcupti-dev libglu1-mesa-dev
-      libx11-dev libxmu-dev libxi-dev libgl1-mesa-glx libboost-all-dev
-      libboost-python-dev freeglut3 freeglut3-dev python3-dev libxcb-xtest0"
-
-DEV="build-essential openjdk-$JDK_VER-jdk ant maven vim"
-
-UTILS="htop pkg-config software-properties-gtk gdb m4
-       python3-software-properties software-properties-common mesa-utils
-       apt-transport-https ca-certificates mesa-utils-extra xserver-xorg-dev
-       ssh curl nfs-kernel-server nfs-common seahorse unzip unrar keepass2
-       postgresql postgresql-contrib pgadmin3 xdotool cmake
-       python3-pip telegram-desktop virtualbox hardinfo"
-
-CUSTOM_SOFT="git google-chrome-stable sublime-text docker-ce
-             gimp gimp-data gimp-plugin-registry gimp-data-extras
-             libreoffice libreoffice-gtk3 code nodejs"
+APT_PACKAGES="binutils autoconf automake libtool checkinstall openssl libcurl4-openssl-dev libssl-dev libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 libbz2-1.0:i386
+              libgtk2.0-dev libgtk-3-dev libavcodec-dev libavformat-dev libswscale-dev libv4l-dev libxvidcore-dev libx264-dev libtbb2 libtbb-dev libjpeg-dev libpng-dev libv4l-dev
+              libtiff5-dev libdc1394-22-dev libatlas-base-dev gfortran ibus wmctrl tcl-dev tk-dev python-tk python3-tk libcupti-dev libglu1-mesa-dev libx11-dev libxmu-dev
+              libxi-dev libgl1-mesa-glx libboost-all-dev libboost-python-dev freeglut3 freeglut3-dev python3-dev libxcb-xtest0
+              build-essential openjdk-$JDK_VER-jdk ant maven vim
+              htop pkg-config software-properties-gtk gdb m4
+              python3-software-properties software-properties-common mesa-utils
+              apt-transport-https ca-certificates mesa-utils-extra xserver-xorg-dev
+              ssh nfs-kernel-server nfs-common seahorse unzip unrar keepass2
+              postgresql postgresql-contrib pgadmin3 xdotool cmake
+              python3-pip telegram-desktop virtualbox hardinfo snapd
+              gnome-tweak-tool httpie bat
+              google-chrome-stable sublime-text docker-ce
+              gimp gimp-data gimp-plugin-registry gimp-data-extras
+              libreoffice libreoffice-gtk3"
 
 PURGE_SOFT="modemmanager pidgin catfish gnome-mines
             gnome-sudoku xfburn gigolo mousepad thunderbird
             sgt-launcher sgt-puzzles"
 
-#########################################################################################
-#
-# Soft which benefits from manual installation
-#
-#########################################################################################
-
-SOURCE_SOFT=( gradle skype postman npm tor zoom )
-
-GRADLE_URL="https://downloads.gradle-dn.com/distributions/gradle-7.1-all.zip"
-SKYPE_URL="https://repo.skype.com/latest/skypeforlinux-64.deb"
-POSTMAN_URL="https://dl.pstmn.io/download/latest/linux64"
 TOR_URL="https://dist.torproject.org/torbrowser/10.0.18/tor-browser-linux64-10.0.18_en-US.tar.xz"
-ZOOM_URL="https://cdn.zoom.us/prod/5.7.25958.0621/zoom_amd64.deb"
 
 #########################################################################################
-#
-# Check if the system needs reboot
-#
+# Routines
 #########################################################################################
 
 check_reboot() {
-    printf "\n" 
+    echo
     if [ -f /var/run/reboot-required ]; then
         printf "${ALERT} - Reboot required. Halt.${NC}\n"
         exit 0
     fi;
 }
 
-#########################################################################################
-#
-# Run command with one line output
-#
-#########################################################################################
+update() {
+    echo
+    printf "${INFO} - Updating default packages:${NC}\n"
+    echo
 
-run-one-line() {
-    $1 | while IFS= read -r line
-    do
-        echo -ne "\r\033[K\t${line:0:$TERMINAL_COLUMNS}"
-    done
-    return ${PIPESTATUS[0]}
+    apt-get update
+    apt-get upgrade -y
+    apt-get dist-upgrade -y
+    # curl is needed before the apt packages are installed
+    apt-get install curl
+    check_reboot
 }
-
-#########################################################################################
-#
-# Purge unnecessary packages
-#
-#########################################################################################
 
 cleanup() {
-    printf "${INFO} - Purging unnecessary packages...${NC}\n"
-    update_index
-    run-one-line "apt-get purge $PURGE_SOFT -y"
+    echo
+    printf "${INFO} - Purging unnecessary packages:${NC}\n"
+    echo
 
-    run-one-line "apt-get autoremove -y"
-    run-one-line "apt-get autoclean -y"
+    apt-get purge $PURGE_SOFT -y
+    apt-get autoremove -y
+    apt-get autoclean -y
     check_reboot
 }
-
-#########################################################################################
-#
-# Upgrade the system to the latest state
-#
-#########################################################################################
-
-update_index() {
-    printf "${INFO}\tUpdating cache... ${NC}"
-    apt-get update > /dev/null
-    printf "${INFO}Done${NC}\n"
-}
-
-upgrade() {
-    printf "${INFO} - Upgrading default packages...${NC}\n"
-    update_index
-    run-one-line "apt-get dist-upgrade -y"
-    check_reboot
-}
-
-#########################################################################################
-#
-# Install required libraries, utilities and software from default repositories
-#
-#########################################################################################
-
-install_defaults() {
-    printf "${INFO} - Installing libraries and soft from default repositories... ${NC}\n"
-    update_index
-    run-one-line "apt-get install $CORE $LIBS $DEV $UTILS -y"
-    check_reboot
-}
-
-#########################################################################################
-#
-# Install some additional repositories
-#
-#########################################################################################
 
 add_repos() {
-    printf "${INFO} - Setting up 3rd party repositories...${NC}\n"
-    update_index
+    echo
+    printf "${INFO} - Adding custom repositories:${NC}\n"
+    echo
 
-    ######################################################################
-    # CHROME REPO
-    ######################################################################
+    # Chrome repo
     if ! apt-cache policy | grep google > /dev/null; then
-        printf "${INFO}\tAdding Google Chrome repo... ${NC}"
-        wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - >> $LOG 2>&1
-        sh -c 'printf "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list' >> $LOG 2>&1
-        printf "${INFO}Done${NC}\n"
+        wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+        sh -c 'printf "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list'
     else
         printf "${INFO}\tGoogle Chrome repo is already there${NC}\n"
     fi
 
-    ######################################################################
-    # NODE REPO
-    ######################################################################
-    if ! apt-cache policy | grep node > /dev/null; then
-        printf "${INFO}\tAdding NodeJS repo... ${NC}"
-        curl -sL https://deb.nodesource.com/setup_11.x -o nodesource_setup.sh
-        bash nodesource_setup.sh >> $LOG 2>&1
-        rm nodesource_setup.sh
-        printf "${INFO}Done${NC}\n"
-    else
-        printf "${INFO}\tNodeJS repo is already there${NC}\n"
-    fi
-
-    ######################################################################
-    # VS CODE REPO
-    ######################################################################
-    if ! apt-cache policy | grep vscode > /dev/null; then
-        printf "${INFO}\tAdding VS Code repo... ${NC}"
-        curl -sL https://packages.microsoft.com/keys/microsoft.asc | sudo -H gpg --dearmor > /etc/apt/trusted.gpg.d/microsoft.gpg
-        sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list' >> $LOG 2>&1
-        printf "${INFO}Done${NC}\n"
-    else
-        printf "${INFO}\tVS Code repo is already there${NC}\n"
-    fi
-
-    ######################################################################
-    # DOCKER REPO
-    ######################################################################
+    # Docker repo
     if ! apt-cache policy | grep docker > /dev/null; then
-        printf "${INFO}\tAdding Docker repo... ${NC}"
         echo "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable" >> /etc/apt/sources.list.d/docker.list
-        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add - >> $LOG 2>&1
-        printf "${INFO}Done${NC}\n"
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
     else
         printf "${INFO}\tDocker repo is already there${NC}\n"
     fi 
 
-    ######################################################################
-    # SUBLIME REPO
-    ######################################################################
+    # Sublime repo
     if ! apt-cache policy | grep sublime > /dev/null; then
-        printf "${INFO}\tAdding Sublime Text repo... ${NC}"
-        wget -qO - https://download.sublimetext.com/sublimehq-pub.gpg | apt-key add - >> $LOG 2>&1
-        apt-add-repository "deb https://download.sublimetext.com/ apt/stable/" --yes >> $LOG 2>&1 
-        printf "${INFO}Done${NC}\n"
+        wget -qO - https://download.sublimetext.com/sublimehq-pub.gpg | apt-key add -
+        apt-add-repository "deb https://download.sublimetext.com/ apt/stable/" --yes 
     else
         printf "${INFO}\tSublime Text repo is already there${NC}\n"
     fi
 
-    ######################################################################
-    # NVIDIA REPO
-    ######################################################################
+    # Nvidia repo
     if ! apt-cache policy | grep graphics > /dev/null; then
-        printf "${INFO}\tAdding Nvidia repo... ${NC}"
-        apt-add-repository ppa:graphics-drivers/ppa --yes >> $LOG 2>&1 
-        printf "${INFO}Done${NC}\n"
+        apt-add-repository ppa:graphics-drivers/ppa --yes 
     else
         printf "${INFO}\tNvidia repo is already there${NC}\n"
     fi
 
-    ######################################################################
-    # GIT REPO
-    ######################################################################
-    if ! apt-cache policy | grep git-core > /dev/null; then
-        printf "${INFO}\tAdding Git repo... ${NC}"
-        apt-add-repository ppa:git-core/ppa --yes >> $LOG 2>&1 
-        printf "${INFO}Done${NC}\n"
+    # gping repo
+    if ! apt-cache policy | grep gping > /dev/null; then
+        echo "deb http://packages.azlux.fr/debian/ buster main" | tee /etc/apt/sources.list.d/azlux.list
+        wget -qO - https://azlux.fr/repo.gpg.key | apt-key add -
     else
-        printf "${INFO}\tGit repo is already there${NC}\n"
-    fi     
+        printf "${INFO}\tGping repo is already there${NC}\n"
+    fi
 
-    update_index
+    apt-get update
 }
 
-#########################################################################################
-#
-# Install required libraries, utilities and software from custom repositories
-#
-#########################################################################################
+fetch_packages() {
+    echo
+    printf "${INFO} - Downloading additional packages:${NC}\n"
+    echo
+
+    if [[ ! -f "tor.tar.xz" ]]; then
+        printf "${INFO}   - tor.tar.xz${NC}\n"
+        curl -# -o tor.tar.xz https://dist.torproject.org/torbrowser/10.0.18/tor-browser-linux64-10.0.18_en-US.tar.xz
+    fi
+
+    if [[ ! -f "bottom.deb" ]]; then
+        printf "${INFO}   - bottom.deb${NC}\n"
+        curl -L -# -o bottom.deb https://github.com/ClementTsang/bottom/releases/download/0.6.2/bottom_0.6.2_amd64.deb
+    fi
+
+    if [[ ! -f "lsd.deb" ]]; then
+        printf "${INFO}   - lsd.deb${NC}\n"
+        curl -L -# -o lsd.deb https://github.com/Peltoche/lsd/releases/download/0.20.1/lsd_0.20.1_amd64.deb
+    fi
+
+    if [[ ! -f "hyperfine.deb" ]]; then
+        printf "${INFO}   - hyperfine.deb${NC}\n"
+        curl -L -# -o hyperfine.deb https://github.com/sharkdp/hyperfine/releases/download/v1.11.0/hyperfine_1.11.0_amd64.deb
+    fi
+
+    chown -R $UNAME:$UGROUP ./*
+    chmod 755 ./*
+}
+
+
+install_apt() {
+    printf "${INFO} - Installing libraries and soft from default repositories...${NC}\n"
+    apt-get install $APT_PACKAGES -y
+    # `classic` snap support
+    ln -s /var/lib/snapd/snap /snap
+}
 
 install_customs() {
-    printf "${INFO} - Installing soft from custom repositories... ${NC}\n"
-    update_index
-    run-one-line "apt-get install $CUSTOM_SOFT -y"
+    echo
+    printf "${INFO} - Installing software from archives:${NC}\n"
+    echo
 
-    check_reboot
+    # Custom NVM install
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | sudo -u $UNAME bash
+
+    # Custom Tor Browser install
+    arch=tor.tar.xz
+    tar xf $arch -C $OPTDIR
+    folder_name=$(tar tJf $arch | sed -e 's@/.*@@' | uniq)
+    chown -R $UNAME:$UGROUP $OPTDIR/$folder_name
+    cp $OPTDIR/$folder_name/start-tor-browser.desktop /usr/share/applications/
+    chmod 744 /usr/share/applications/start-tor-browser.desktop
+    sed -i 's|\"\$(dirname\s\"\$\*\")\"|'"$OPTDIR/$folder_name"'|g' /usr/share/applications/start-tor-browser.desktop
+
+    dpkg -i bottom.deb lsd.deb hyperfine.deb
 }
 
-#########################################################################################
-#
-# Install soft from source destribution (extract & run)
-#
-#########################################################################################
+install_snaps() {
+    echo
+    tries=15
+    to_install=1
+    snap_available=0
+    while [[ "$snap_available" = 0 ]]
+    do
+        tries=$tries-1
+        if [[ $tries -le 0 ]]; then
+            # reset the flag, don't install snap packages
+            to_install=0
+            break
+        fi
 
-install_gradle() {
-    if [ ! $(ls $OPTDIR | grep 'gradle') ]; then
-        arch=gradle.zip
-        printf "${INFO}\tDownloading... ${NC}\n"
-        curl -# -o $arch $GRADLE_URL
-        printf "${INFO}\tInstalling... ${NC}\n"
+        snap install core
+        snap_code=$?
 
-        unzip -qq -d $OPTDIR $arch
-        gradle_root=$(unzip -qql $arch | sed -r '1 {s/([ ]+[^ ]+){3}\s+//;q}')
-        chown -R $UNAME:$UGROUP $OPTDIR/$gradle_root
-        echo 'export PATH="$PATH:/opt/'$gradle_root'bin"' >> $HM/.profile
-        source $HM/.profile
+        if [[ $snap_code = 0 ]]; then
+            snap_available=1
+        else
+            printf "${INFO} Waiting for the snap service to initialize...${NC}\n"
+            sleep 5
+        fi
+    done
 
-        rm $arch
+    if [[ $to_install -ne 0 ]]; then
+        printf "${INFO} - Installing software from snap:${NC}\n"
+        echo
+        printf "${INFO}   - vscode${NC}\n"
+        snap install --classic code
+        printf "${INFO}   - telegram${NC}\n"
+        snap install telegram-desktop
+        printf "${INFO}   - skype${NC}\n"
+        snap install skype
+        printf "${INFO}   - postman${NC}\n"
+        snap install postman
+        printf "${INFO}   - gradle${NC}\n"
+        snap install gradle --classic
+        printf "${INFO}   - zoom${NC}\n"
+        snap install zoom-client
+        printf "${INFO}   - procs${NC}\n"
+        snap install procs
     else
-        printf "${INFO}\tGradle is in place...${NC}\n"
+        printf "${ALERT} - Snap service is not available at the moment, please try to run the snap installation later by running 'sudo ./xubuntu-setup.sh --install_defaults'.${NC}\n"
     fi
 }
-
-install_skype() {
-    if [ -z $(which skypeforlinux) ]; then 
-        arch=skype.deb
-
-        printf "${INFO}\tDownloading... ${NC}\n"
-        curl -# -o $arch $SKYPE_URL
-        printf "${INFO}\tInstalling... ${NC}\n"
-        dpkg -i $arch >> $LOG 2>&1
-
-        rm $arch
-    else
-        printf "${INFO}\tSkype is in place...${NC}\n"
-    fi
-}
-
-install_postman() {
-    if [ ! $(ls $OPTDIR | grep 'Postman') ]; then 
-        arch=postman.tar.gz
-        
-        printf "${INFO}\tDownloading... ${NC}\n"
-        curl -# -o $arch $POSTMAN_URL
-        printf "${INFO}\tInstalling... ${NC}\n"
-        tar xf $arch -C $OPTDIR
-        chown -R $UNAME:$UGROUP $OPTDIR/$(tar tzf $arch | sed -e 's@/.*@@' | uniq)
-      
-        echo "[Desktop Entry]" > /usr/share/applications/postman.desktop
-        echo "  Name=Postman" >> /usr/share/applications/postman.desktop
-        echo "  Type=Application" >> /usr/share/applications/postman.desktop
-        echo "  Exec=/opt/Postman/Postman" >> /usr/share/applications/postman.desktop
-        echo "  Terminal=false" >> /usr/share/applications/postman.desktop
-        echo "  Icon=/opt/Postman/app/resources/app/assets/icon.png" >> /usr/share/applications/postman.desktop
-        echo "  Comment=" >> /usr/share/applications/postman.desktop
-        echo "  NoDisplay=false" >> /usr/share/applications/postman.desktop
-        echo "  Categories=Development;" >> /usr/share/applications/postman.desktop
-
-        rm $arch
-    else
-        printf "${INFO}\tPostman is in place...${NC}\n"
-    fi
-}
-
-install_tor() {
-    if [ ! $(ls $OPTDIR | grep 'tor-browser') ]; then 
-        arch=tor_browser.tar.xz
-        
-        printf "${INFO}\tDownloading... ${NC}\n"
-        curl -# -o $arch $TOR_URL
-        printf "${INFO}\tInstalling... ${NC}\n"
-        tar xf $arch -C $OPTDIR
-        folder_name=$(tar tJf $arch | sed -e 's@/.*@@' | uniq)
-        chown -R $UNAME:$UGROUP $OPTDIR/$folder_name
-
-        cp $OPTDIR/$folder_name/start-tor-browser.desktop /usr/share/applications/
-        chmod 744 /usr/share/applications/start-tor-browser.desktop
-        sed -i 's|\"\$(dirname\s\"\$\*\")\"|'"$OPTDIR/$folder_name"'|g' /usr/share/applications/start-tor-browser.desktop
-
-        rm $arch
-    else
-        printf "${INFO}\tTor Browser is in place...${NC}\n"
-    fi
-}
-
-install_zoom() {
-    if [ -z $(which zoom) ]; then 
-        arch=zoom.deb
-
-        printf "${INFO}\tDownloading... ${NC}\n"
-        curl -# -o $arch $ZOOM_URL
-        printf "${INFO}\tInstalling... ${NC}\n"
-        dpkg -i $arch >> $LOG 2>&1
-
-        rm $arch
-    else
-        printf "${INFO}\Zoom is in place...${NC}\n"
-    fi
-}
-
-install_npm() {
-    npm i -g npm >> $LOG 2>&1
-}
-
-#########################################################################################
-#
-# Main routine for installations above
-#
-#########################################################################################
-
-install_archives() {
-    archs=("$@")
-    for name in "${archs[@]}"; do
-        printf "${INFO} - Setting up $name...${NC}\n"
-        install_$name
-        printf "${INFO}\tDone${NC}\n"
-    done   
-}
-
-#########################################################################################
-#
-# Setup different config files for git, xfce etc.
-#
-#########################################################################################
 
 configs() {
-
-    printf "${INFO} - Setting up config files...${NC}\n"
-
-    sed -i 's|# en_US.UTF-8 UTF-8|en_US.UTF-8 UTF-8|' /etc/locale.gen
-    sed -i 's|# ru_RU.UTF-8 UTF-8|ru_RU.UTF-8 UTF-8|' /etc/locale.gen
-    locale-gen
-    localectl set-locale LANG=en_US.utf8
-    update-locale LC_ALL=en_US.UTF-8
+    echo
+    printf "${INFO} - Setting up configs:${NC}\n"
+    echo
 
     # Display line numbers in vim
     echo "set number" > ~/.vimrc
 
-    # Workaround for VS Code
-    echo "fs.inotify.max_user_watches=524288" > /etc/sysctl.conf
+    # FS tweak for VSCode
+    echo "fs.inotify.max_user_watches=524288" >> /etc/sysctl.conf
     sysctl -p
 
     # Custom aliases
     if [[ ! $(cat $HM/.bashrc | grep 'custom aliases') ]]; then
-        cat ./config/xubuntu/bashrc >> $HM/.bashrc
+        cat $WORKDIR/config/xubuntu/bashrc >> $HM/.bashrc
     fi
 
+    # Git config
+    cat $WORKDIR/config/gitconf > $HM/.gitconfig
+    chown $UNAME:$UGROUP $HM/.gitconfig
+
     # Customized configs for desktop, keyboard, etc.
-    cat ./config/gitconf > $HM/.gitconfig
-    cat ./config/xubuntu/helpers.rc > $HM/.config/xfce4/helpers.rc
-    cat ./config/xubuntu/keyboard-layout.xml > $HM/.config/xfce4/xfconf/xfce-perchannel-xml/keyboard-layout.xml
-    cat ./config/xubuntu/mimeapps.list > $HM/.config/mimeapps.list
+    cat $WORKDIR/config/gitconf > $HM/.gitconfig
+    cat $WORKDIR/config/xubuntu/helpers.rc > $HM/.config/xfce4/helpers.rc
+    cat $WORKDIR/config/xubuntu/keyboard-layout.xml > $HM/.config/xfce4/xfconf/xfce-perchannel-xml/keyboard-layout.xml
+    cat $WORKDIR/config/xubuntu/mimeapps.list > $HM/.config/mimeapps.list
     mkdir $HM/.config/xfce4/panel/
-    cat ./config/xubuntu/whiskermenu-7.rc > $HM/.config/xfce4/panel/whiskermenu-7.rc
-    cat ./config/xubuntu/xfce4-desktop.xml > $HM/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml
-    cat ./config/xubuntu/xfce4-keyboard-shortcuts.xml > $HM/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-keyboard-shortcuts.xml
-    cat ./config/xubuntu/xfce4-panel.xml > $HM/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml
-    cat ./config/xubuntu/terminalrc > $HM/.config/xfce4/terminal/terminalrc
+    cat $WORKDIR/config/xubuntu/whiskermenu-7.rc > $HM/.config/xfce4/panel/whiskermenu-7.rc
+    cat $WORKDIR/config/xubuntu/xfce4-desktop.xml > $HM/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml
+    cat $WORKDIR/config/xubuntu/xfce4-keyboard-shortcuts.xml > $HM/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-keyboard-shortcuts.xml
+    cat $WORKDIR/config/xubuntu/xfce4-panel.xml > $HM/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml
+    cat $WORKDIR/config/xubuntu/terminalrc > $HM/.config/xfce4/terminal/terminalrc
+    TERMINAL_COLUMNS=$(tput cols)
+    TERMINAL_LINES=$(tput lines)
     sed -i -E "s|MiscDefaultGeometry=([0-9]+)x([0-9]+)|MiscDefaultGeometry=${TERMINAL_COLUMNS}x${TERMINAL_LINES}|" $HM/.config/xfce4/terminal/terminalrc
 
-    printf "${INFO} - Setting up directories...${NC}\n"
-
-    for i in "${JUNKDIRS[@]}"; do 
-        rm -rf $i
-    done
+    #Other configs
+    mkdir -p $HM/.config/lsd
+    cp $WORKDIR/config/lsd.config.yml $HM/.config/lsd/config.yml
 
     for i in "${WORKDIRS[@]}"; do
         if [[ ! -d $i ]]; then
@@ -451,18 +287,31 @@ configs() {
         fi
     done
 
-    printf "${INFO}   Done${NC}"
+    chown -R $UNAME:$UGROUP $HM/.config
+
+    #SSH config
+    SSH_DIR=$HM/.ssh
+    if [ -d "$SSH_DIR" ]; then
+        # start the ssh-agent in the background
+        eval $(ssh-agent -s)
+        # make ssh agent to actually use copied key
+        ssh-add $SSH_DIR/id_rsa
+        chmod 700 $SSH_DIR
+        chmod 600 $SSH_DIR/id_rsa
+        chmod 600 $SSH_DIR/id_rsa.pub
+        chmod 600 $SSH_DIR/config
+    else
+        printf "${ALERT} - SSH directory not found in the home directory. Did you forget to put it there? ${INFO}Continue:${NC}\n"
+    fi
 }
 
 
 #########################################################################################
-# 
-# Main routine 
-#
+# Main
 #########################################################################################
 
 print_usage() {
-    printf "Usage: sudo ./fedora-setup.sh [OPTION]\n\n"
+    printf "Usage: sudo ./xubuntu-setup.sh [OPTION]\n\n"
     printf "Options:\n"
     printf "\t--all (or no options) - perform all tasks\n"
     printf "\t-c, --cleanup - purge unused packages\n"
@@ -483,42 +332,36 @@ if [[ ! " ${valid_args[@]} " =~ " $1 " ]]; then
     exit 1
 fi
 
-# Set Ubuntu packages source from main server
-sed -i 's|http://us.|http://|g' /etc/apt/sources.list
-sed -i 's|http://ru.|http://|g' /etc/apt/sources.list
+echo
+hostnamectl
 
-
-printf "${INFO}========================\n"
-printf "Ubuntu system:\n"
-printf "\t$(lsb_release -i)\n\t$(lsb_release -d)\n\t$(lsb_release -r)\n\t$(lsb_release -c)\n"
-printf "========================\n"
+mkdir -p $HM/xubuntu-setup
+chown -R $UNAME:$UGROUP $HM/xubuntu-setup
+pushd $HM/xubuntu-setup/ > /dev/null
 
 case "$1" in
     ""|"--all")
-        # Launch procedures 
+        update
         cleanup
-        upgrade
-        install_defaults
         add_repos
+        fetch_packages
+        install_apt
         install_customs
-        upgrade
-        install_archives "${SOURCE_SOFT[@]}"
-        configs
-        # Ensure we go to reboot
-        touch /var/run/reboot-required
-        check_reboot;;
+        install_snaps
+        configs;;
     "-c"|"--cleanup")
         cleanup;;
     "-r"|"--repos")
         add_repos;;
     "-p"|"--install_from_pm")
-        install_defaults
-        install_customs;;
+        install_apt
+        install_snaps;;
     "-s"|"--install_from_source")
-        upgrade
-        install_archives "${SOURCE_SOFT[@]}";;
+        install_customs;;
 esac
 
-# Restore access to local config store
+popd > /dev/null
 
-chown -R $UNAME:$UGROUP $HM/.config
+echo
+printf "${INFO} Done!${NC}\n"
+echo
