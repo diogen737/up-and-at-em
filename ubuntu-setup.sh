@@ -135,7 +135,7 @@ add_repos() {
 
     # ubuntu-cleaner repo
     if ! apt-cache policy | grep gerardpuig > /dev/null; then
-        add-apt-repository ppa:gerardpuig/ppa
+        add-apt-repository ppa:gerardpuig/ppa --yes
     else
 	    printf "${INFO}\tubuntu-cleaner repo is already there${NC}\n"
     fi
@@ -202,6 +202,9 @@ install_customs() {
 
 install_snaps() {
     echo
+    printf "${INFO} - Installing software from snap:${NC}\n"
+    echo
+
     tries=15
     to_install=1
     snap_available=0
@@ -226,25 +229,23 @@ install_snaps() {
     done
 
     if [[ $to_install -ne 0 ]]; then
-        printf "${INFO} - Installing software from snap:${NC}\n"
-        echo
-        printf "${INFO}   - vscode${NC}\n"
+        printf "${INFO}   - vscode (1/9)${NC}\n"
         snap install --classic code
-        printf "${INFO}   - telegram${NC}\n"
+        printf "${INFO}   - telegram (2/9)${NC}\n"
         snap install telegram-desktop
-        printf "${INFO}   - skype${NC}\n"
+        printf "${INFO}   - skype (3/9)${NC}\n"
         snap install skype
-        printf "${INFO}   - postman${NC}\n"
+        printf "${INFO}   - postman (4/9)${NC}\n"
         snap install postman
-        printf "${INFO}   - gradle${NC}\n"
+        printf "${INFO}   - gradle (5/9)${NC}\n"
         snap install gradle --classic
-        printf "${INFO}   - zoom${NC}\n"
+        printf "${INFO}   - zoom (6/9)${NC}\n"
         snap install zoom-client
-        printf "${INFO}   - procs${NC}\n"
+        printf "${INFO}   - procs (7/9)${NC}\n"
         snap install procs
-        printf "${INFO}   - gimp${NC}\n"
+        printf "${INFO}   - gimp (8/9)${NC}\n"
         snap install gimp
-        printf "${INDO}   - spotify${NC}\n"
+        printf "${INFO}   - spotify (9/9)${NC}\n"
         snap install spotify
     else
         printf "${ALERT} - Snap service is not available at the moment, please try to run the snap installation later by running 'sudo ./ubuntu-setup.sh --install_defaults'.${NC}\n"

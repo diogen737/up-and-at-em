@@ -93,6 +93,9 @@ install_dnf() {
 
 install_snaps() {
     echo
+    printf "${INFO} - Installing software from snap:${NC}\n"
+    echo
+
     tries=15
     to_install=1
     snap_available=0
@@ -117,17 +120,15 @@ install_snaps() {
     done
 
     if [[ $to_install -ne 0 ]]; then
-        printf "${INFO} - Installing software from snap:${NC}\n"
-        echo
-        printf "${INFO}   - vscode${NC}\n"
+        printf "${INFO}   - vscode (1/5)${NC}\n"
         snap install --classic code
-        printf "${INFO}   - telegram${NC}\n"
+        printf "${INFO}   - telegram (2/5)${NC}\n"
         snap install telegram-desktop
-        printf "${INFO}   - skype${NC}\n"
+        printf "${INFO}   - skype (3/5)${NC}\n"
         snap install skype
-        printf "${INFO}   - postman${NC}\n"
+        printf "${INFO}   - postman (4/5)${NC}\n"
         snap install postman
-        printf "${INFO}   - gradle${NC}\n"
+        printf "${INFO}   - gradle (5/5)${NC}\n"
         snap install gradle --classic
     else
         printf "${ALERT} - Snap service is not available at the moment, please try to run the snap installation later by running 'sudo ./fedora-setup.sh --install_defaults'.${NC}\n"
