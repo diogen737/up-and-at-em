@@ -37,7 +37,7 @@ APT_PACKAGES="binutils autoconf automake libtool checkinstall openssl libcurl4-o
               software-properties-gtk gdb m4 python3-software-properties software-properties-common apt-transport-https ca-certificates
               ssh nfs-kernel-server nfs-common seahorse unzip unrar keepass2 postgresql postgresql-contrib pgadmin4 cmake python3-pip
               virtualbox hardinfo snapd gnome-tweak-tool httpie bat google-chrome-stable sublime-text docker-ce dconf-editor
-              gnome-tweak-tool ubuntu-cleaner tlp"
+              gnome-tweak-tool ubuntu-cleaner tlp indicator-multiload"
 
 PURGE_SOFT="modemmanager pidgin catfish gnome-mines
             gnome-sudoku xfburn gigolo mousepad thunderbird
@@ -242,10 +242,10 @@ install_snaps() {
         snap install zoom-client
         printf "${INFO}   - procs${NC}\n"
         snap install procs
-	printf "${INFO}   - gimp${NC}\n"
-	snap install gimp
-	printf "${INDO}   - spotify${NC}\n"
-	snap install spotify
+        printf "${INFO}   - gimp${NC}\n"
+        snap install gimp
+        printf "${INDO}   - spotify${NC}\n"
+        snap install spotify
     else
         printf "${ALERT} - Snap service is not available at the moment, please try to run the snap installation later by running 'sudo ./ubuntu-setup.sh --install_defaults'.${NC}\n"
     fi
@@ -274,6 +274,11 @@ configs() {
     # Git config
     cat $WORKDIR/config/gitconf > $HM/.gitconfig
     chown $UNAME:$UGROUP $HM/.gitconfig
+
+    #Other configs
+    mkdir -p $HM/.config/lsd
+    cp $WORKDIR/config/lsd.config.yml $HM/.config/lsd/config.yml
+    cp $WORKDIR/config/ubuntu/indicator.multiload.preferences.ui /usr/share/indicator-multiload/preferences.ui
 
     for i in "${WORKDIRS[@]}"; do
         if [[ ! -d $i ]]; then

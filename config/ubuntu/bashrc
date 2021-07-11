@@ -5,6 +5,7 @@ alias ls='lsd'
 alias l='ls -l'
 alias la='ls -la'
 alias lt='ls --tree'
+alias cat='batcat'
 
 alias upd='sudo apt-get update'
 alias upg='sudo apt-get update && sudo apt-get upgrade'
