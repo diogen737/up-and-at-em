@@ -44,6 +44,9 @@ PURGE_SOFT="modemmanager pidgin catfish gnome-mines
             sgt-launcher sgt-puzzles aisleriot gnome-mahjongg"
 
 TOR_URL="https://dist.torproject.org/torbrowser/10.0.18/tor-browser-linux64-10.0.18_en-US.tar.xz"
+BOTTOM_URL="https://github.com/ClementTsang/bottom/releases/download/0.6.2/bottom_0.6.2_amd64.deb"
+LSD_URL="https://github.com/Peltoche/lsd/releases/download/0.20.1/lsd_0.20.1_amd64.deb"
+HYPERFINE_URL="https://github.com/sharkdp/hyperfine/releases/download/v1.11.0/hyperfine_1.11.0_amd64.deb"
 
 #########################################################################################
 # Routines
@@ -150,22 +153,22 @@ fetch_packages() {
 
     if [[ ! -f "tor.tar.xz" ]]; then
         printf "${INFO}   - tor.tar.xz${NC}\n"
-        curl -# -o tor.tar.xz https://dist.torproject.org/torbrowser/10.0.18/tor-browser-linux64-10.0.18_en-US.tar.xz
+        curl -# -o tor.tar.xz $TOR_URL
     fi
 
     if [[ ! -f "bottom.deb" ]]; then
         printf "${INFO}   - bottom.deb${NC}\n"
-        curl -L -# -o bottom.deb https://github.com/ClementTsang/bottom/releases/download/0.6.2/bottom_0.6.2_amd64.deb
+        curl -L -# -o bottom.deb $BOTTOM_URL
     fi
 
     if [[ ! -f "lsd.deb" ]]; then
         printf "${INFO}   - lsd.deb${NC}\n"
-        curl -L -# -o lsd.deb https://github.com/Peltoche/lsd/releases/download/0.20.1/lsd_0.20.1_amd64.deb
+        curl -L -# -o lsd.deb $LSD_URL
     fi
 
     if [[ ! -f "hyperfine.deb" ]]; then
         printf "${INFO}   - hyperfine.deb${NC}\n"
-        curl -L -# -o hyperfine.deb https://github.com/sharkdp/hyperfine/releases/download/v1.11.0/hyperfine_1.11.0_amd64.deb
+        curl -L -# -o hyperfine.deb $HYPERFINE_URL
     fi
 
     chown -R $UNAME:$UGROUP ./*
@@ -280,13 +283,8 @@ configs() {
     mkdir -p $HM/.config/lsd
     cp $WORKDIR/config/lsd.config.yml $HM/.config/lsd/config.yml
     cp $WORKDIR/config/ubuntu/indicator.multiload.preferences.ui /usr/share/indicator-multiload/preferences.ui
-
-    for i in "${WORKDIRS[@]}"; do
-        if [[ ! -d $i ]]; then
-            mkdir $i
-            chown -R $UNAME:$UGROUP $i
-        fi
-    done
+    # run indicator multiload manually for the first time
+    nohup indicator-multiload &
 
     chown -R $UNAME:$UGROUP $HM/.config
 
