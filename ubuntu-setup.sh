@@ -232,24 +232,26 @@ install_snaps() {
     done
 
     if [[ $to_install -ne 0 ]]; then
-        printf "${INFO}   - vscode (1/9)${NC}\n"
+        printf "${INFO}   - vscode (1/10)${NC}\n"
         snap install --classic code
-        printf "${INFO}   - telegram (2/9)${NC}\n"
+        printf "${INFO}   - telegram (2/10)${NC}\n"
         snap install telegram-desktop
-        printf "${INFO}   - skype (3/9)${NC}\n"
+        printf "${INFO}   - skype (3/10)${NC}\n"
         snap install skype
-        printf "${INFO}   - postman (4/9)${NC}\n"
+        printf "${INFO}   - postman (4/10)${NC}\n"
         snap install postman
-        printf "${INFO}   - gradle (5/9)${NC}\n"
+        printf "${INFO}   - gradle (5/10)${NC}\n"
         snap install gradle --classic
-        printf "${INFO}   - zoom (6/9)${NC}\n"
+        printf "${INFO}   - zoom (6/10)${NC}\n"
         snap install zoom-client
-        printf "${INFO}   - procs (7/9)${NC}\n"
+        printf "${INFO}   - procs (7/10)${NC}\n"
         snap install procs
-        printf "${INFO}   - gimp (8/9)${NC}\n"
+        printf "${INFO}   - gimp (8/10)${NC}\n"
         snap install gimp
-        printf "${INFO}   - spotify (9/9)${NC}\n"
+        printf "${INFO}   - spotify (9/10)${NC}\n"
         snap install spotify
+        printf "${INFO}   - vlc (10/10)${NC}\n"
+        snap install vlc
     else
         printf "${ALERT} - Snap service is not available at the moment, please try to run the snap installation later by running 'sudo ./ubuntu-setup.sh --install_defaults'.${NC}\n"
     fi
