@@ -43,7 +43,7 @@ PURGE_SOFT="modemmanager pidgin catfish gnome-mines
             gnome-sudoku xfburn gigolo mousepad thunderbird
             sgt-launcher sgt-puzzles aisleriot gnome-mahjongg"
 
-TOR_URL="https://dist.torproject.org/torbrowser/10.0.18/tor-browser-linux64-10.0.18_en-US.tar.xz"
+TOR_URL="https://dist.torproject.org/torbrowser/10.5.2/tor-browser-linux64-10.5.2_en-US.tar.xz"
 BOTTOM_URL="https://github.com/ClementTsang/bottom/releases/download/0.6.2/bottom_0.6.2_amd64.deb"
 LSD_URL="https://github.com/Peltoche/lsd/releases/download/0.20.1/lsd_0.20.1_amd64.deb"
 HYPERFINE_URL="https://github.com/sharkdp/hyperfine/releases/download/v1.11.0/hyperfine_1.11.0_amd64.deb"
@@ -285,8 +285,6 @@ configs() {
     mkdir -p $HM/.config/lsd
     cp $WORKDIR/config/lsd.config.yml $HM/.config/lsd/config.yml
     cp $WORKDIR/config/ubuntu/indicator.multiload.preferences.ui /usr/share/indicator-multiload/preferences.ui
-    # run indicator multiload manually for the first time
-    nohup indicator-multiload &
 
     chown -R $UNAME:$UGROUP $HM/.config
 
